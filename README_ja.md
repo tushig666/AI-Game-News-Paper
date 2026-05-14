@@ -82,6 +82,7 @@ app/
 ### 1. マルチサイト自律スクレイピング
 
 スクレイピング対象:
+
 - **IGN.com** - 主要ゲーム出版物
 - **GameSpot.com** - 包括的なゲームカバレッジ
 - **PC Gamer** - PC ゲーム中心
@@ -89,6 +90,7 @@ app/
 - **Eurogamer.net** - ヨーロッパのゲームニュース
 
 **機能:**
+
 - 非同期同時スクレイピング (設定可能なワーカー)
 - User-Agent ローテーション
 - サイト単位のレート制限
@@ -99,6 +101,7 @@ app/
 ### 2. インテリジェント記事抽出
 
 **抽出内容:**
+
 - タイトル、URL、著者、公開日
 - 記事本文全文
 - サムネイル画像
@@ -106,6 +109,7 @@ app/
 - 関連ゲームタイトル
 
 **処理:**
+
 - HTML無害化
 - コンテンツ正規化
 - コンテンツハッシュによる重複検出
@@ -116,6 +120,7 @@ app/
 **Claude 3.5 Sonnet または GPT-4 Turbo を使用:**
 
 生成内容:
+
 - **簡潔な要約**: 2-3文の要約
 - **ポイント箇条書き**: 3つの主要なテイクアウェイ
 - **センチメント**: 強気/弱気/中立/混合
@@ -125,6 +130,7 @@ app/
 - **ゲーマー関心度**: 視聴者関心 0-100
 
 **アーキテクチャ:**
+
 - フォールバック付きAIサービス抽象化
 - トークン使用量追跡
 - コスト推定
@@ -134,12 +140,14 @@ app/
 ### 4. 高度な非同期アーキテクチャ
 
 **構築基盤:**
+
 - `asyncio` - 非同期ランタイム
 - `aiohttp` - 非同期HTTPクライアント
 - `SQLAlchemy 2.0` - 非同期 ORM
 - `asyncpg` - ネイティブ非同期PostgreSQLドライバ
 
 **パイプライン機能:**
+
 - セマフォプールによるタスクオーケストレーション
 - キューベースアーキテクチャ
 - グレースフルシャットダウン処理
@@ -149,6 +157,7 @@ app/
 ### 5. PostgreSQL データベース
 
 **スキーマ内容:**
+
 - `articles` - コア記事レコード
 - `ai_summaries` - LLM生成分析
 - `source_sites` - スクレイピングソースメタデータ
@@ -156,6 +165,7 @@ app/
 - `trending_scores` - 時系列メトリクス
 
 **最適化:**
+
 - 一般的なクエリ上の複合インデックス
 - コネクションプーリング (非同期)
 - 効率的なJSON保存
@@ -164,10 +174,12 @@ app/
 ### 6. データエクスポートシステム
 
 **エクスポート形式:**
+
 - 完全なメタデータ付きJSON
 - スプレッドシート分析用CSV
 
 **エクスポートタイプ:**
+
 - 要約付きすべての記事
 - センチメント別フィルター
 - トレンド記事 (24時間/7日)
@@ -176,6 +188,7 @@ app/
 ### 7. エンタープライズログ
 
 **機能:**
+
 - コンテキスト付き構造化ログ
 - ローテーティングファイルハンドラ (10MB、5バックアップ)
 - カラーコンソール出力
@@ -186,12 +199,14 @@ app/
 ### 8. 設定 & シークレット
 
 **環境管理:**
+
 - `.env` ファイルのシークレット
 - Pydantic Settings 検証
 - ハードコードされた認証情報なし
 - 環境ごとのオーバーライド
 
 **設定可能な設定:**
+
 - APIキー (OpenAI, Claude)
 - データベース接続文字列
 - スクレイパー同時実行とタイムアウト
@@ -267,6 +282,7 @@ python -m app.main
 ### 環境変数
 
 **データベース:**
+
 ```
 DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/game_news_ai
 DATABASE_POOL_SIZE=20
@@ -274,6 +290,7 @@ DATABASE_MAX_OVERFLOW=10
 ```
 
 **AI サービス:**
+
 ```
 AI_PROVIDER=claude                                    # claude または openai
 ANTHROPIC_API_KEY=sk-ant-...
@@ -283,6 +300,7 @@ AI_RETRIES=3
 ```
 
 **スクレイピング:**
+
 ```
 SCRAPER_CONCURRENT_WORKERS=4
 SCRAPER_TIMEOUT_SECONDS=30
@@ -292,6 +310,7 @@ RATE_LIMIT_PER_SECOND=2
 ```
 
 **ログ:**
+
 ```
 LOG_LEVEL=INFO                    # DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOG_FILE=logs/app.log
@@ -300,6 +319,7 @@ LOG_BACKUP_COUNT=5
 ```
 
 **デプロイ:**
+
 ```
 ENVIRONMENT=production            # development, staging, production
 DEBUG=False
@@ -370,14 +390,14 @@ async def export_results():
     factory = get_session_factory()
     async with factory() as db:
         export_service = ExportService(db)
-        
+
         # すべての記事をエクスポート
         json_path = await export_service.export_all_articles(format_type="json")
         csv_path = await export_service.export_all_articles(format_type="csv")
-        
+
         # トレンド記事をエクスポート
         trending_path = await export_service.export_trending(hours=24)
-        
+
         # センチメント別にエクスポート
         bullish_path = await export_service.export_by_sentiment("bullish")
 ```
@@ -450,10 +470,12 @@ CREATE INDEX idx_summary_trend_probability ON ai_summaries(trend_probability);
 ### 現在の価格 (2024)
 
 **Claude 3.5 Sonnet:**
+
 - 入力: 100万トークンあたり $3
 - 出力: 100万トークンあたり $15
 
 **GPT-4 Turbo:**
+
 - 入力: 100万トークンあたり $10
 - 出力: 100万トークンあたり $30
 
@@ -574,24 +596,25 @@ spec:
         app: game-news-app
     spec:
       containers:
-      - name: app
-        image: game-news-ai:latest
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: url
-        - name: ANTHROPIC_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: api-keys
-              key: anthropic
+        - name: app
+          image: game-news-ai:latest
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: url
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys
+                  key: anthropic
 ```
 
 ### 環境別設定
 
 **開発:**
+
 ```
 ENVIRONMENT=development
 DEBUG=True
@@ -600,6 +623,7 @@ SCRAPER_CONCURRENT_WORKERS=2
 ```
 
 **ステージング:**
+
 ```
 ENVIRONMENT=staging
 DEBUG=False
@@ -608,6 +632,7 @@ SCRAPER_CONCURRENT_WORKERS=4
 ```
 
 **本番:**
+
 ```
 ENVIRONMENT=production
 DEBUG=False
@@ -672,17 +697,17 @@ class CustomSiteScraper(ScraperBase):
             base_url="https://customsite.com",
             timeout=30
         )
-    
+
     async def scrape(self):
         articles = []
         html = await self.fetch_page("https://customsite.com/news")
-        
+
         # HTML を解析して記事を抽出
         soup = BeautifulSoup(html, 'html.parser')
         for element in soup.find_all('article', limit=20):
             article = ArticleData(...)
             articles.append(article)
-        
+
         return articles
 
 # get_all_scrapers() に登録
@@ -695,7 +720,7 @@ class CustomAIService(AIServiceBase):
     async def summarize_article(self, article_content):
         # カスタム実装
         pass
-    
+
     async def extract_entities(self, text):
         # カスタム実装
         pass
@@ -716,21 +741,25 @@ async def export_xml(articles, path):
 ### よくある問題
 
 **問題**: API レート制限
+
 ```
 解決策: SCRAPER_TIMEOUT_SECONDS を増やし、SCRAPER_CONCURRENT_WORKERS を減らします
 ```
 
 **問題**: データベース接続プール枯渇
+
 ```
 解決策: アクティブな接続を確認し、DATABASE_POOL_SIZE を増やし、クエリタイムアウトを確認します
 ```
 
 **問題**: AI API タイムアウト
+
 ```
 解決策: AI_TIMEOUT_SECONDS を増やし、バッチサイズを減らし、ネットワーク接続を確認します
 ```
 
 **問題**: メモリ使用量が増加
+
 ```
 解決策: 接続プール プリピングを有効にし、バッチサイズを減やし、ガベージコレクションを有効にします
 ```
@@ -758,6 +787,7 @@ async def export_xml(articles, path):
 ## 今後の改善
 
 ### フェーズ 2 機能
+
 - [ ] リアルタイム WebSocket ストリーミング
 - [ ] ML ベースのゲームタイトル認識
 - [ ] 高度な NLP エンティティ抽出
@@ -767,6 +797,7 @@ async def export_xml(articles, path):
 - [ ] コミュニティセンチメント統合 (Twitter、Reddit)
 
 ### フェーズ 3 機能
+
 - [ ] ダッシュボード UI (React/Vue)
 - [ ] 認証付き REST API
 - [ ] GraphQL エンドポイント
@@ -777,6 +808,7 @@ async def export_xml(articles, path):
 - [ ] 機械学習推奨
 
 ### スケーラビリティロードマップ
+
 - [ ] Kubernetes でのスケーリング
 - [ ] マルチリージョンデプロイ
 - [ ] シャード化データベース戦略
@@ -815,6 +847,7 @@ MIT ライセンス - [LICENSE](LICENSE) ファイルを参照
 ## 謝辞
 
 構築者:
+
 - SQLAlchemy 2.0
 - Anthropic Claude API
 - OpenAI API

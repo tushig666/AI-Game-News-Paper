@@ -23,7 +23,55 @@ The **Game News AI Platform** is a production-ready, autonomous media intelligen
 
 ---
 
-## Architecture
+## Quick Start
+
+### 🚀 Start Everything in 60 Seconds
+
+```bash
+# Terminal 1: Start the backend (Python)
+cp .env.example .env
+# Edit .env with your API keys
+docker-compose up -d
+# or: python -m app.main
+
+# Terminal 2: Start the frontend (Node.js)
+cd frontend
+npm install
+npm run dev
+
+# 🎉 Open http://localhost:3000 in browser
+```
+
+---
+
+## 🎨 Frontend (Premium UI/UX)
+
+Built with **Next.js + Tailwind CSS + Framer Motion**
+
+### Key Features
+- ✨ Futuristic glassmorphism design
+- 🎯 Real-time AI news feed with infinite scroll
+- ⚡ Live scraper status panel
+- 🎮 Smart game category filters
+- 🧠 AI insights sidebar with sentiment analysis
+- 💫 Smooth cyberpunk animations
+- 📱 Fully responsive (mobile, tablet, desktop)
+- 🌙 Dark mode with neon colors
+
+### Screenshots & Details
+See [frontend/README.md](frontend/README.md) for complete UI documentation and [frontend/QUICKSTART.md](frontend/QUICKSTART.md) for setup guide.
+
+### Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **HTTP**: Axios
+- **Language**: TypeScript
+
+---
+
+## 🔧 Architecture
 
 ### High-Level Pipeline
 
@@ -82,6 +130,7 @@ app/
 ### 1. Multi-Site Autonomous Scraping
 
 Scrapes from:
+
 - **IGN.com** - Major gaming publication
 - **GameSpot.com** - Comprehensive game coverage
 - **PC Gamer** - PC gaming focus
@@ -89,6 +138,7 @@ Scrapes from:
 - **Eurogamer.net** - European gaming news
 
 **Capabilities:**
+
 - Async concurrent scraping (configurable workers)
 - User-Agent rotation
 - Rate limiting per site
@@ -99,6 +149,7 @@ Scrapes from:
 ### 2. Intelligent Article Extraction
 
 **Extracts:**
+
 - Title, URL, author, publication date
 - Full article body
 - Thumbnail images
@@ -106,6 +157,7 @@ Scrapes from:
 - Related game titles
 
 **Processing:**
+
 - HTML sanitization
 - Content normalization
 - Duplicate detection via content hash
@@ -116,6 +168,7 @@ Scrapes from:
 **Using Claude 3.5 Sonnet or GPT-4 Turbo:**
 
 Generates:
+
 - **Concise Summary**: 2-3 sentence summary
 - **Bullet Points**: 3 key takeaways
 - **Sentiment**: Bullish/Bearish/Neutral/Mixed
@@ -125,6 +178,7 @@ Generates:
 - **Gamer Interest**: 0-100 audience interest
 
 **Architecture:**
+
 - AI service abstraction with fallback
 - Token usage tracking
 - Cost estimation
@@ -134,12 +188,14 @@ Generates:
 ### 4. Advanced Async Architecture
 
 **Built on:**
+
 - `asyncio` - Async runtime
 - `aiohttp` - Async HTTP client
 - `SQLAlchemy 2.0` - Async ORM
 - `asyncpg` - Native async PostgreSQL driver
 
 **Pipeline Features:**
+
 - Task orchestration with semaphore pools
 - Queue-based architecture
 - Graceful shutdown handling
@@ -149,6 +205,7 @@ Generates:
 ### 5. PostgreSQL Database
 
 **Schema includes:**
+
 - `articles` - Core article records
 - `ai_summaries` - LLM-generated analysis
 - `source_sites` - Scraping source metadata
@@ -156,6 +213,7 @@ Generates:
 - `trending_scores` - Time-based metrics
 
 **Optimizations:**
+
 - Composite indexes on common queries
 - Connection pooling (async)
 - Efficient JSON storage
@@ -164,10 +222,12 @@ Generates:
 ### 6. Data Export System
 
 **Export Formats:**
+
 - JSON with full metadata
 - CSV for spreadsheet analysis
 
 **Export Types:**
+
 - All articles with summaries
 - Filtered by sentiment
 - Trending articles (24h/7d)
@@ -176,6 +236,7 @@ Generates:
 ### 7. Enterprise Logging
 
 **Features:**
+
 - Structured logging with context
 - Rotating file handlers (10MB, 5 backups)
 - Colored console output
@@ -186,12 +247,14 @@ Generates:
 ### 8. Configuration & Secrets
 
 **Environment Management:**
+
 - `.env` file for secrets
 - Pydantic Settings validation
 - No hardcoded credentials
 - Per-environment overrides
 
 **Configurable Settings:**
+
 - API keys (OpenAI, Claude)
 - Database connection strings
 - Scraper concurrency & timeouts
@@ -267,6 +330,7 @@ python -m app.main
 ### Environment Variables
 
 **Database:**
+
 ```
 DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/game_news_ai
 DATABASE_POOL_SIZE=20
@@ -274,6 +338,7 @@ DATABASE_MAX_OVERFLOW=10
 ```
 
 **AI Services:**
+
 ```
 AI_PROVIDER=claude                                    # claude or openai
 ANTHROPIC_API_KEY=sk-ant-...
@@ -283,6 +348,7 @@ AI_RETRIES=3
 ```
 
 **Scraping:**
+
 ```
 SCRAPER_CONCURRENT_WORKERS=4
 SCRAPER_TIMEOUT_SECONDS=30
@@ -292,6 +358,7 @@ RATE_LIMIT_PER_SECOND=2
 ```
 
 **Logging:**
+
 ```
 LOG_LEVEL=INFO                    # DEBUG, INFO, WARNING, ERROR, CRITICAL
 LOG_FILE=logs/app.log
@@ -300,6 +367,7 @@ LOG_BACKUP_COUNT=5
 ```
 
 **Deployment:**
+
 ```
 ENVIRONMENT=production            # development, staging, production
 DEBUG=False
@@ -370,14 +438,14 @@ async def export_results():
     factory = get_session_factory()
     async with factory() as db:
         export_service = ExportService(db)
-        
+
         # Export all articles
         json_path = await export_service.export_all_articles(format_type="json")
         csv_path = await export_service.export_all_articles(format_type="csv")
-        
+
         # Export trending
         trending_path = await export_service.export_trending(hours=24)
-        
+
         # Export by sentiment
         bullish_path = await export_service.export_by_sentiment("bullish")
 ```
@@ -450,10 +518,12 @@ CREATE INDEX idx_summary_trend_probability ON ai_summaries(trend_probability);
 ### Current Pricing (2024)
 
 **Claude 3.5 Sonnet:**
+
 - Input: $3 per 1M tokens
 - Output: $15 per 1M tokens
 
 **GPT-4 Turbo:**
+
 - Input: $10 per 1M tokens
 - Output: $30 per 1M tokens
 
@@ -574,24 +644,25 @@ spec:
         app: game-news-app
     spec:
       containers:
-      - name: app
-        image: game-news-ai:latest
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: url
-        - name: ANTHROPIC_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: api-keys
-              key: anthropic
+        - name: app
+          image: game-news-ai:latest
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: url
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys
+                  key: anthropic
 ```
 
 ### Environment-Specific Configs
 
 **Development:**
+
 ```
 ENVIRONMENT=development
 DEBUG=True
@@ -600,6 +671,7 @@ SCRAPER_CONCURRENT_WORKERS=2
 ```
 
 **Staging:**
+
 ```
 ENVIRONMENT=staging
 DEBUG=False
@@ -608,6 +680,7 @@ SCRAPER_CONCURRENT_WORKERS=4
 ```
 
 **Production:**
+
 ```
 ENVIRONMENT=production
 DEBUG=False
@@ -672,17 +745,17 @@ class CustomSiteScraper(ScraperBase):
             base_url="https://customsite.com",
             timeout=30
         )
-    
+
     async def scrape(self):
         articles = []
         html = await self.fetch_page("https://customsite.com/news")
-        
+
         # Parse HTML and extract articles
         soup = BeautifulSoup(html, 'html.parser')
         for element in soup.find_all('article', limit=20):
             article = ArticleData(...)
             articles.append(article)
-        
+
         return articles
 
 # Register in get_all_scrapers()
@@ -695,7 +768,7 @@ class CustomAIService(AIServiceBase):
     async def summarize_article(self, article_content):
         # Custom implementation
         pass
-    
+
     async def extract_entities(self, text):
         # Custom implementation
         pass
@@ -716,21 +789,25 @@ async def export_xml(articles, path):
 ### Common Issues
 
 **Issue**: API rate limiting
+
 ```
 Solution: Increase SCRAPER_TIMEOUT_SECONDS, reduce SCRAPER_CONCURRENT_WORKERS
 ```
 
 **Issue**: Database connection pool exhaustion
+
 ```
 Solution: Check active connections, increase DATABASE_POOL_SIZE, review query timeouts
 ```
 
 **Issue**: AI API timeouts
+
 ```
 Solution: Increase AI_TIMEOUT_SECONDS, reduce batch size, check network connectivity
 ```
 
 **Issue**: Memory usage growing
+
 ```
 Solution: Enable connection pool pre-ping, reduce batch size, enable garbage collection
 ```
@@ -758,6 +835,7 @@ Solution: Enable connection pool pre-ping, reduce batch size, enable garbage col
 ## Future Enhancements
 
 ### Phase 2 Features
+
 - [ ] Real-time WebSocket streaming
 - [ ] ML-based game title recognition
 - [ ] Advanced NLP entity extraction
@@ -767,6 +845,7 @@ Solution: Enable connection pool pre-ping, reduce batch size, enable garbage col
 - [ ] Community sentiment integration (Twitter, Reddit)
 
 ### Phase 3 Features
+
 - [ ] Dashboard UI (React/Vue)
 - [ ] REST API with authentication
 - [ ] GraphQL endpoint
@@ -777,6 +856,7 @@ Solution: Enable connection pool pre-ping, reduce batch size, enable garbage col
 - [ ] Machine learning recommendations
 
 ### Scalability Roadmap
+
 - [ ] Horizontal scaling with Kubernetes
 - [ ] Multi-region deployment
 - [ ] Sharded database strategy
@@ -815,6 +895,7 @@ Contributions are welcome! Please:
 ## Acknowledgments
 
 Built with:
+
 - SQLAlchemy 2.0
 - Anthropic Claude API
 - OpenAI API
@@ -915,6 +996,7 @@ app/
 ### 1. マルチサイト自律スクレイピング
 
 スクレイピング対象:
+
 - **IGN.com** - 主要ゲーム出版物
 - **GameSpot.com** - 包括的なゲームカバレッジ
 - **PC Gamer** - PC ゲーム中心
@@ -922,6 +1004,7 @@ app/
 - **Eurogamer.net** - ヨーロッパのゲームニュース
 
 **機能:**
+
 - 非同期同時スクレイピング (設定可能なワーカー)
 - User-Agent ローテーション
 - サイト単位のレート制限
@@ -932,6 +1015,7 @@ app/
 ### 2. インテリジェント記事抽出
 
 **抽出内容:**
+
 - タイトル、URL、著者、公開日
 - 記事本文全文
 - サムネイル画像
@@ -939,6 +1023,7 @@ app/
 - 関連ゲームタイトル
 
 **処理:**
+
 - HTML無害化
 - コンテンツ正規化
 - コンテンツハッシュによる重複検出
@@ -949,6 +1034,7 @@ app/
 **Claude 3.5 Sonnet または GPT-4 Turbo を使用:**
 
 生成内容:
+
 - **簡潔な要約**: 2-3文の要約
 - **ポイント�条書き**: 3つの主要なテイクアウェイ
 - **センチメント**: 強気/弱気/中立/混合
@@ -1027,7 +1113,7 @@ async def export_results():
     factory = get_session_factory()
     async with factory() as db:
         export_service = ExportService(db)
-        
+
         # すべての記事をエクスポート
         json_path = await export_service.export_all_articles(format_type="json")
         csv_path = await export_service.export_all_articles(format_type="csv")
@@ -1070,16 +1156,19 @@ docker-compose down
 ### よくある問題
 
 **問題**: API レート制限
+
 ```
 解決策: SCRAPER_TIMEOUT_SECONDS を増やし、SCRAPER_CONCURRENT_WORKERS を減らします
 ```
 
 **問題**: データベース接続プール枯渇
+
 ```
 解決策: アクティブな接続を確認し、DATABASE_POOL_SIZE を増やし、クエリタイムアウトを確認します
 ```
 
 **問題**: メモリ使用量が増加
+
 ```
 解決策: 接続プール プリピングを有効にし、バッチサイズを減やし、ガベージコレクションを有効にします
 ```
