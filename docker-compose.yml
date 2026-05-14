@@ -1,0 +1,118 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: game_news_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: game_news_ai
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - game_news_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: game_news_cache
+    command: redis-server --appendonly yes --requirepass redis_password
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - game_news_network
+
+  # Main Application
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: game_news_app
+    environment:
+      # Database
+      DATABASE_URL: postgresql+asyncpg://user:password@postgres:5432/game_news_ai
+      DATABASE_POOL_SIZE: 20
+      DATABASE_MAX_OVERFLOW: 10
+      
+      # Redis
+      REDIS_URL: redis://:redis_password@redis:6379/0
+      CACHE_TTL_SECONDS: 3600
+      
+      # API Keys (set in .env)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-claude}
+      
+      # Scraping
+      SCRAPER_CONCURRENT_WORKERS: 4
+      SCRAPER_TIMEOUT_SECONDS: 30
+      SCRAPER_RETRY_ATTEMPTS: 3
+      SCRAPING_INTERVAL_MINUTES: 30
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-False}
+      
+      # Services
+      ENABLE_HEALTH_CHECK: "True"
+      ENABLE_METRICS: "True"
+      ENABLE_CACHING: "True"
+      
+      # Sentry (optional)
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      ENABLE_SENTRY: ${ENABLE_SENTRY:-False}
+    
+    volumes:
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      - ./.env:/app/.env:ro
+    
+    ports:
+      - "8000:8000"
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - game_news_network
+    
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  game_news_network:
+    driver: bridge
