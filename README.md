@@ -826,3 +826,303 @@ Built with:
 ---
 
 **Made with ❤️ by the AI Engineering Team**
+
+---
+
+# 日本語版 / Japanese Version
+
+# AI対応ゲームニュースインテリジェンスプラットフォーム
+
+![Status](https://img.shields.io/badge/status-active-success)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+> **大規模ゲームニュースサイトから継続的にコンテンツをスクレイピングし、インテリジェントに記事を抽出し、LLM APIを使用して要約を生成し、ゲームに対するセンチメント分析を実施し、構造化されたインテリジェンスデータをアナリティクスとダッシュボード向けに保存するエンタープライズグレードの自律システム。**
+
+## 概要
+
+**ゲームニュースAIプラットフォーム**は、大規模でゲームニュースを処理する本番環境対応の自律型メディアインテリジェンスエンジンです。IGN、GameSpot、および最新のメディア監視プラットフォームなどの企業が使用するシステムのように設計されています。
+
+### 主な機能
+
+- **🤖 自律スクレイピング**: インテリジェントなレート制限を備えたマルチサイト同時スクレイピング
+- **🧠 AI要約**: Claude/GPT ベースの記事分析とセンチメント・ハイプスコアリング
+- **📊 高度なアナリティクス**: トレンド検出、センチメント分布、ゲーマー関心度メトリクス
+- **🔄 非同期アーキテクチャ**: タスクオーケストレーション機能を備えた本番グレードの非同期パイプライン
+- **💾 PostgreSQL統合**: 効率的なクエリのための正規化スキーマ
+- **📤 データエクスポート**: 分析とダッシュボード用のJSONおよびCSVエクスポート
+- **📝 エンタープライズロギング**: 完全なコンテキスト情報を含む構造化ロギング
+- **🐳 Dockerサポート**: 完全なコンテナ化デプロイメントスタック
+
+---
+
+## アーキテクチャ
+
+### 高レベルパイプライン
+
+```
+スクレイピング層
+    ↓
+[IGN] [GameSpot] [PC Gamer] [Polygon] [Eurogamer]
+    ↓ (非同期プール)
+コンテンツ処理
+    ↓
+[重複検出] → [HTML無害化] → [正規化]
+    ↓
+データベース層
+    ↓
+PostgreSQL (記事)
+    ↓
+AI分析層
+    ↓
+[Claude/OpenAI API] → [要約] → [センチメント分析] → [ハイプスコアリング]
+    ↓
+データベース層 (要約)
+    ↓
+エクスポート/アナリティクス
+    ↓
+[JSONエクスポート] [CSVエクスポート] [トレンド分析] [ダッシュボード]
+```
+
+### コンポーネントアーキテクチャ
+
+```
+app/
+├── core/                    # コア機能とコンスタンス
+├── config/                  # 設定管理 (pydantic-settings)
+├── database/                # データベース接続とライフサイクル
+├── models/                  # SQLAlchemy ORM モデル
+├── scrapers/                # Webスクレイピングモジュール
+│   ├── base.py             # 抽象スクレイパーベースクラス
+│   └── sites.py            # 具体的な実装 (IGN, GameSpot など)
+├── ai/                      # AI サービス層
+│   └── service.py          # Claude/OpenAI 抽象化
+├── services/                # ビジネスロジックサービス
+│   └── article.py          # 記事処理サービス
+├── pipelines/               # 非同期オーケストレーション
+│   └── processing.py       # メインパイプライン & スケジューラー
+├── exporters/               # データエクスポートサービス
+│   └── service.py          # JSON/CSVエクスポート
+├── utils/                   # ユーティリティ
+│   └── logging_config.py   # 構造化ロギング
+└── main.py                  # アプリケーションエントリーポイント
+```
+
+---
+
+## 機能
+
+### 1. マルチサイト自律スクレイピング
+
+スクレイピング対象:
+- **IGN.com** - 主要ゲーム出版物
+- **GameSpot.com** - 包括的なゲームカバレッジ
+- **PC Gamer** - PC ゲーム中心
+- **Polygon.com** - ゲーム文化 & 分析
+- **Eurogamer.net** - ヨーロッパのゲームニュース
+
+**機能:**
+- 非同期同時スクレイピング (設定可能なワーカー)
+- User-Agent ローテーション
+- サイト単位のレート制限
+- 指数バックオフによるインテリジェント再試行
+- タイムアウト処理
+- 重複URL検出
+
+### 2. インテリジェント記事抽出
+
+**抽出内容:**
+- タイトル、URL、著者、公開日
+- 記事本文全文
+- サムネイル画像
+- タグ/カテゴリ
+- 関連ゲームタイトル
+
+**処理:**
+- HTML無害化
+- コンテンツ正規化
+- コンテンツハッシュによる重複検出
+- 品質フィルタリング
+
+### 3. AI要約パイプライン
+
+**Claude 3.5 Sonnet または GPT-4 Turbo を使用:**
+
+生成内容:
+- **簡潔な要約**: 2-3文の要約
+- **ポイント�条書き**: 3つの主要なテイクアウェイ
+- **センチメント**: 強気/弱気/中立/混合
+- **ハイプスコア**: 興奮度を示す 0-100
+- **カテゴリ**: ニュース/レビュー/フィーチャー/インタビュー/うわさ/更新
+- **トレンド確率**: トレンド化の可能性 0-100
+- **ゲーマー関心度**: 視聴者関心 0-100
+
+### 4. インストール & セットアップ
+
+#### 前提条件
+
+- Python 3.10+
+- Docker & Docker Compose (オプション、推奨)
+- PostgreSQL 13+ (Docker を使用しない場合)
+- Claude または OpenAI のAPIキー
+
+#### Docker クイックスタート
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/yourusername/game-news-ai.git
+cd game-news-ai
+
+# 環境テンプレートをコピー
+cp .env.example .env
+
+# APIキーで .env を編集
+# ANTHROPIC_API_KEY=sk-ant-...
+# OPENAI_API_KEY=sk-...
+
+# すべてのサービスを開始
+docker-compose up -d
+
+# ログを確認
+docker-compose logs -f app
+```
+
+#### ローカル開発セットアップ
+
+```bash
+# 仮想環境を作成
+python3.11 -m venv venv
+source venv/bin/activate  # Windows では: venv\Scripts\activate
+
+# 依存関係をインストール
+pip install -r requirements.txt
+
+# 環境をセットアップ
+cp .env.example .env
+# .env を編集して設定とAPIキーを入力
+
+# アプリケーションを実行
+python -m app.main
+```
+
+### 5. 使用方法
+
+#### パイプラインの実行 (自律)
+
+```bash
+# デーモンを開始 (スケジュール間隔で継続実行)
+python -m app.main
+
+# パイプラインは 30 分ごとに実行 (設定可能)
+# スクレイプ → 処理 → 保存 → 要約 → エクスポート
+```
+
+#### データをエクスポート
+
+```python
+from app.exporters.service import ExportService
+from app.database.connection import get_session_factory
+
+async def export_results():
+    factory = get_session_factory()
+    async with factory() as db:
+        export_service = ExportService(db)
+        
+        # すべての記事をエクスポート
+        json_path = await export_service.export_all_articles(format_type="json")
+        csv_path = await export_service.export_all_articles(format_type="csv")
+```
+
+---
+
+## テスト
+
+### すべてのテストを実行
+
+```bash
+pytest tests/ -v
+
+# カバレッジ付き
+pytest tests/ --cov=app --cov-report=html
+```
+
+---
+
+## デプロイ
+
+### Docker Compose (推奨)
+
+```bash
+# すべてのサービスを開始
+docker-compose up -d
+
+# ログを表示
+docker-compose logs -f app
+
+# シャットダウン
+docker-compose down
+```
+
+---
+
+## トラブルシューティング
+
+### よくある問題
+
+**問題**: API レート制限
+```
+解決策: SCRAPER_TIMEOUT_SECONDS を増やし、SCRAPER_CONCURRENT_WORKERS を減らします
+```
+
+**問題**: データベース接続プール枯渇
+```
+解決策: アクティブな接続を確認し、DATABASE_POOL_SIZE を増やし、クエリタイムアウトを確認します
+```
+
+**問題**: メモリ使用量が増加
+```
+解決策: 接続プール プリピングを有効にし、バッチサイズを減やし、ガベージコレクションを有効にします
+```
+
+---
+
+## 本番環境チェックリスト
+
+- [ ] `ENVIRONMENT=production` を設定
+- [ ] `DEBUG=False` を設定
+- [ ] 強力なデータベースパスワードを設定
+- [ ] 有効な API キー (Claude/OpenAI) を設定
+- [ ] Sentry エラー追跡を有効化
+- [ ] ログローテーション & リテンション を設定
+- [ ] ヘルスチェック監視を設定
+- [ ] リソース制限 (CPU、メモリ) を設定
+
+---
+
+## サポート & 貢献
+
+### 貢献
+
+貢献を歓迎します。次の手順に従ってください:
+
+1. リポジトリをフォーク
+2. フィーチャーブランチを作成
+3. 新機能についてテストを追加
+4. プルリクエストを送信
+
+### ヘルプを取得
+
+- 📧 メール: support@gamenewsai.com
+- 💬 Discord: [コミュニティに参加](https://discord.gg/gamenewsai)
+- 📖 ドキュメント: [完全ドキュメント](https://docs.gamenewsai.com)
+- 🐛 イシュー: [GitHub Issues](https://github.com/yourusername/game-news-ai/issues)
+
+---
+
+## ライセンス
+
+MIT ライセンス - [LICENSE](LICENSE) ファイルを参照
+
+---
+
+**AI エンジニアリングチームによって ❤️ で作成されました**
