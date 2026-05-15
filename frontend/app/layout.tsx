@@ -1,13 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import '../styles/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export const metadata: Metadata = {
   title: 'Game News AI - Futuristic News Intelligence',
   description: 'Real-time AI-powered gaming news scraper and intelligence platform',
-  viewport: 'width=device-width, initial-scale=1',
 }
 
 export default function RootLayout({
